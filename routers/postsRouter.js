@@ -7,7 +7,7 @@ const postsController = require('../controllers/postsController');
 
 
 
-router.get('/all-post', postsController.getPosts);
+router.get('/all-posts', postsController.getPosts);
 //router.get('/single-post', authController.signin);
 //router.post('/create-post', identifier, authController.signout);
 
