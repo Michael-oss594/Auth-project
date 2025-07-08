@@ -25,3 +25,14 @@ exports.getPosts = async (req, res) => {
         console.log(error);
     }
 };
+
+exports.createPost = async(req, res)=> {
+    const { title, description } = req.body;
+    const {userId} = req.user;
+
+    try {
+
+    } catch (error) {
+        console.log(error);
+    }
+};
