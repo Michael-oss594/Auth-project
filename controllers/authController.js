@@ -278,7 +278,7 @@ exports.verifyForgotPasswordCode = async (req, res) => {
     const { error, value } = acceptFPCodeSchema.validate({ 
       email, 
       providedCode, 
-      newPassword 
+      newPassword, 
     });
     
     if (error) {

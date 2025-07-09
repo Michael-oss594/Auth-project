@@ -1,4 +1,6 @@
 const Posts = require('../models/postsModel');
+const { createPostSchema } = require('../middlewares/validator');
+const Post = require('../models/postsModel');
 
 
 exports.getPosts = async (req, res) => {
@@ -8,9 +10,9 @@ exports.getPosts = async (req, res) => {
     try {
         let pageNum = 0;
         if(page <= 1){
-            pageNum = 0
+            pageNum = 0;
         }else{
-            pageNum = page - 1
+            pageNum = page - 1;
         }
         const result = await Posts.find()
         .sort({createdAt: -1})
@@ -26,12 +28,115 @@ exports.getPosts = async (req, res) => {
     }
 };
 
+exports.singlePost = async (req, res) => {
+    const { _id} = req.query;
+    
+
+    try {
+        
+        const result = await Post.findOne({_id})
+        
+        .populate({
+            path: 'userId',
+            select: 'email',
+    });
+    if (!existingPost) {
+        return res
+            .status(404)
+            .json({ success: false, message: 'Post unavailable' });
+    }
+    res.status(200).json({ success: true, message: 'single post', date: result });
+    } catch (error) {
+        console.log(error);
+    }
+};
 exports.createPost = async(req, res)=> {
     const { title, description } = req.body;
     const {userId} = req.user;
 
     try {
+const { error, value } = createPostSchema.validate({ 
+      title, 
+      description, 
+      userId, 
+    });
+    
+    if (error) {
+      return res
+        .status(401)
+        .json({ success: false, message: error.details[0].message });
+    }
 
+    const result = await Posts.create({
+        title,
+        description,
+        userId,
+    });
+    res.status(201).json({ success: true, message: 'created', date: result });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+exports.updatePost = async(req, res)=> {
+    const { _id } = req.query;
+    const { title, description } = req.body;
+    const {userId} = req.user;
+
+    try {
+const { error, value } = createPostSchema.validate({ 
+      title, 
+      description, 
+      userId, 
+    });
+    
+    if (error) {
+      return res
+        .status(401)
+        .json({ success: false, message: error.details[0].message });
+    }
+    const existingPost = await Post.findOne({_id})
+    if (!existingPost) {
+        return res
+            .status(404)
+            .json({ success: false, message: 'Post unavailable' });
+    }
+    if (existingPost.userId.toString() !== userId) {
+        return res
+            .status(403)
+            .json({ success: false, message: 'unauthorized' });
+    }
+    existingPost.title = title;
+    existingPost.description = description;
+    
+    const result = await existingPost.save()
+    
+    res.status(200).json({ success: true, message: 'updated', date: result });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+exports.deletePost = async (req, res)=> {
+    const { _id } = req.query;
+   
+    const {userId} = req.user;
+     try {
+
+     const existingPost = await Post.findOne({_id});
+    if (!existingPost) {
+        return res
+            .status(404)
+            .json({ success: false, message: 'Post already unavailable' });
+    }
+    if (existingPost.userId.toString() !== userId) {
+        return res
+            .status(403)
+            .json({ success: false, message: 'unauthorized' });
+    }
+   
+    await Post.deleteOne({_id})
+    res.status(200).json({ success: true, message: 'deleted' });
     } catch (error) {
         console.log(error);
     }
