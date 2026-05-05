@@ -40,6 +40,6 @@ A production-ready RESTful API built with Node.js, Express, and MongoDB, featuri
 
 ```bash
 git clone https://github.com/Michael-oss594/Auth-project.git
-cd your-repo-name
+cd Auth-project
 npm install
 npm run dev
